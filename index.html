@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Monitoring System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #14213d;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header p {
+            color: #cbd5e1;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 25px auto;
+            padding: 15px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card, .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0000000d;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .card p {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+
+        button {
+            border: none;
+            padding: 10px 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .save {
+            background: #2563eb;
+            color: white;
+            width: 100%;
+        }
+
+        .edit {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .delete {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .export {
+            background: #15803d;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .search {
+            margin: 10px 0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+
+        @media (max-width: 800px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Student Attendance Monitoring System</h1>
+    <p>Record, monitor, and manage student attendance</p>
+</header>
+
+<main>
+
+    <section class="dashboard">
+        <div class="card">
+            <h3>Total Records</h3>
+            <p id="total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Present</h3>
+            <p id="present">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Absent</h3>
+            <p id="absent">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Late</h3>
+            <p id="late">0</p>
+        </div>
+    </section>
+
+    <section class="layout">
+
+        <div class="panel">
+            <h2 id="formTitle">Record Attendance</h2>
+
+            <form id="attendanceForm">
+                <label for="studentId">Student ID</label>
+                <input id="studentId" required
+                       placeholder="Enter student ID">
+
+                <label for="studentName">Student Name</label>
+                <input id="studentName" required
+                       placeholder="Enter full name">
+
+                <label for="section">Grade / Section</label>
+                <input id="section" required
+                       placeholder="e.g. Grade 12 - ICT">
+
+                <label for="date">Date</label>
+                <input id="date" type="date" required>
+
+                <label for="status">Attendance Status</label>
+                <select id="status">
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Late">Late</option>
+                </select>
+
+                <button class="save" type="submit" id="saveButton">
+                    Save Attendance
+                </button>
+
+                <button type="button" class="edit"
+                        id="cancelButton" hidden>
+                    Cancel Edit
+                </button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Attendance Records</h2>
+
+            <input class="search" id="search"
+                   placeholder="Search student..."
+                   aria-label="Search students">
+
+            <label for="filter">Filter Status</label>
+            <select id="filter">
+                <option value="All">All Statuses</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+                <option value="Late">Late</option>
+            </select>
+
+            <button class="export" id="exportButton" type="button">
+                Export CSV Report
+            </button>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Section</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    Student Attendance Monitoring System
+</footer>
+
+<script>
+    const STORAGE_KEY = "studentAttendanceRecords";
+    let attendance = loadAttendance();
+    let editingId = null;
+
+    const form = document.getElementById("attendanceForm");
+
+    function today() {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 10);
+    }
+
+    document.getElementById("date").value = today();
+
+    function loadAttendance() {
+        try {
+            return JSON.parse(
+                localStorage.getItem(STORAGE_KEY)
+            ) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(attendance)
+        );
+    }
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, c => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[c]);
+    }
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const student = {
+            id: document.getElementById("studentId")
+                .value.trim(),
+            name: document.getElementById("studentName")
+                .value.trim(),
+            section: document.getElementById("section")
+                .value.trim(),
+            date: document.getElementById("date").value,
+            status: document.getElementById("status").value
+        };
+
+        if (attendance.some(item =>
+            item.id.toLowerCase() === student.id.toLowerCase() &&
+            item.date === student.date &&
+            item.recordId !== editingId
+        )) {
+            alert("This student already has a record for this date.");
+            return;
+        }
+
+        if (editingId !== null) {
+            attendance = attendance.map(item =>
+                item.recordId === editingId
+                    ? { ...student, recordId: editingId }
+                    : item
+            );
+        } else {
+            attendance.push({
+                ...student,
+                recordId: Date.now().toString()
+            });
+        }
+
+        saveData();
+        resetForm();
+        renderRecords();
+    });
+
+    function resetForm() {
+        form.reset();
+        document.getElementById("date").value = today();
+        editingId = null;
+        document.getElementById("formTitle").textContent =
+            "Record Attendance";
+        document.getElementById("saveButton").textContent =
+            "Save Attendance";
+        document.getElementById("cancelButton").hidden = true;
+    }
+
+    document.getElementById("cancelButton")
+        .addEventListener("click", resetForm);
+
+    function renderRecords() {
+        const query = document.getElementById("search")
+            .value.toLowerCase().trim();
+        const filter = document.getElementById("filter").value;
+
+        const filtered = attendance.filter(item => {
+            const matchesSearch = [
+                item.id, item.name, item.section,
+                item.date, item.status
+            ].some(value =>
+                value.toLowerCase().includes(query)
+            );
+
+            return matchesSearch &&
+                (filter === "All" || item.status === filter);
+        });
+
+        document.getElementById("records").innerHTML =
+            filtered.map(item => `
+                <tr>
+                    <td>${escapeHTML(item.id)}</td>
+                    <td>${escapeHTML(item.name)}</td>
+                    <td>${escapeHTML(item.section)}</td>
+                    <td>${escapeHTML(item.date)}</td>
+                    <td>${escapeHTML(item.status)}</td>
+                    <td>
+                        <button class="edit"
+                            onclick="editRecord('${item.recordId}')">
+                            Edit
+                        </button>
+                        <button class="delete"
+                            onclick="deleteRecord('${item.recordId}')">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+
+        document.getElementById("total").textContent =
+            attendance.length;
+        document.getElementById("present").textContent =
+            attendance.filter(x => x.status === "Present").length;
+        document.getElementById("absent").textContent =
+            attendance.filter(x => x.status === "Absent").length;
+        document.getElementById("late").textContent =
+            attendance.filter(x => x.status === "Late").length;
+    }
+
+    function editRecord(id) {
+        const item = attendance.find(x => x.recordId === id);
+        if (!item) return;
+
+        editingId = id;
+        document.getElementById("studentId").value = item.id;
+        document.getElementById("studentName").value = item.name;
+        document.getElementById("section").value = item.section;
+        document.getElementById("date").value = item.date;
+        document.getElementById("status").value = item.status;
+
+        document.getElementById("formTitle").textContent =
+            "Edit Attendance";
+        document.getElementById("saveButton").textContent =
+            "Update Attendance";
+        document.getElementById("cancelButton").hidden = false;
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteRecord(id) {
+        if (!confirm("Delete this attendance record?")) return;
+
+        attendance = attendance.filter(
+            item => item.recordId !== id
+        );
+
+        if (editingId === id) resetForm();
+
+        saveData();
+        renderRecords();
+    }
+
+    document.getElementById("search")
+        .addEventListener("input", renderRecords);
+
+    document.getElementById("filter")
+        .addEventListener("change", renderRecords);
+
+    document.getElementById("exportButton")
+        .addEventListener("click", function() {
+            if (attendance.length === 0) {
+                alert("There are no records to export.");
+                return;
+            }
+
+            const header = [
+                "Student ID", "Student Name",
+                "Section", "Date", "Status"
+            ];
+
+            const rows = attendance.map(item => [
+                item.id, item.name, item.section,
+                item.date, item.status
+            ]);
+
+            const csvCell = value =>
+                '"' + String(value).replace(/"/g, '""') + '"';
+
+            const csv = [header, ...rows]
+                .map(row => row.map(csvCell).join(","))
+                .join("\r\n");
+
+            const blob = new Blob(
+                ["\uFEFF" + csv],
+                { type: "text/csv;charset=utf-8;" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = "attendance-report.csv";
+            link.click();
+
+            URL.revokeObjectURL(url);
+        });
+
+    renderRecords();
+</script>
+
+</body>
+</html>
